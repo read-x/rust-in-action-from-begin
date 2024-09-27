@@ -1,0 +1,6 @@
+[book]
+authors = ["czyt"]
+language = "en"
+multilingual = false
+src = "src"
+title = "Rust语言从入门到实战"
