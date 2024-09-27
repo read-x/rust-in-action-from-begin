@@ -1,4 +1,5 @@
-# 29｜Unsafe编程（上）： Unsafe Rust中那些被封印的能力
+# Unsafe编程（上）： Unsafe Rust中那些被封印的能力
+
 你好，我是Mike。
 
 这门课目前已接近尾声，剩下的两节课我准备讲讲Rust中看起来有点黑魔法的部分——Unsafe Rust。这一节课我们先来聊聊相关的概念。

@@ -1,4 +1,5 @@
-# 26｜Rust GUI编程：用Slint为YOLOv8实现一个界面
+# Rust GUI编程：用Slint为YOLOv8实现一个界面
+
 你好，我是Mike。
 
 今天我们继续用Slint做一个小项目。这个项目的目标是为我们 [第 24 讲](https://time.geekbang.org/column/article/734943) 实现的用YOLOv8从图片中识别出对象及姿势的小应用提供一个GUI界面。

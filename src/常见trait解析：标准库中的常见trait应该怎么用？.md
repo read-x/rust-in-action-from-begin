@@ -1,4 +1,5 @@
-# 11｜常见trait解析：标准库中的常见trait应该怎么用？
+# 常见trait解析：标准库中的常见trait应该怎么用？
+
 你好，我是Mike，今天我们一起来学习Rust中的常见trait。
 
 前面两节课我们已经讲过trait在Rust中的重要性了，这节课就是trait在Rust标准库中的应用。Rust标准库中包含大量的trait定义，甚至Rust自身的某些语言特性就是在这些trait的帮助下实现的。这些trait和标准库里的各种类型一起，构成了整个Rust生态的根基，只有了解它们才算真正了解Rust。

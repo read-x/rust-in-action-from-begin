@@ -1,4 +1,5 @@
-# 25｜Rust GUI编程：用Slint为Chatbot实现一个界面
+# Rust GUI编程：用Slint为Chatbot实现一个界面
+
 你好，我是Mike。今天我们一起来学习如何用Rust进行GUI开发，我们用的GUI库是Slint。
 
 GUI开发非常有趣，它能让你看到立竿见影的效果。这是为什么很多人学习编程喜欢从GUI开发开始（Web开发也是类似的道理）。而且GUI库还能用来做点小游戏什么的，非常有趣。而这两年，Rust生态中冒出来几个非常不错的GUI库，比如Slint、egui、Makepad等，今天我们就以Slint为例来讲讲。

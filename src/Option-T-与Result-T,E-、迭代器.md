@@ -1,4 +1,5 @@
-# 08｜Option<T>与Result<T, E>、迭代器
+# Option<T>与Result<T, E>、迭代器
+
 你好，我是Mike，今天我们一起来重点学习在Rust中高频使用的 `Option<T>`、 `Result<T, E>`、迭代器，通过学习这些内容，我们可以继续夯实集合中所有权相关的知识点。
 
 `Option<T>` 和 `Result<T, E>` 并不是Rust的独创设计，在Rust之前，OCaml、Haskell、Scala等已经使用它们很久了。新兴的一批语言Kotlin、Swift 等也和Rust一样引入了这两种类型。而C++17之后也引入了它们。

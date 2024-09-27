@@ -1,4 +1,5 @@
-# 10｜再探trait：带类型参数的trait及trait object
+# 再探trait：带类型参数的trait及trait object
+
 你好，我是Mike，今天我们继续学习trait相关知识。
 
 回顾一下我们上一节课中类型参数出现的地方。
