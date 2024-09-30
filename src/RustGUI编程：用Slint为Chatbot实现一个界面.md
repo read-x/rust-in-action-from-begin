@@ -336,7 +336,7 @@ export component AppWindow inherits Window {
 
 #### main.rs
 
-```plain
+```rust
 #![allow(unused)]
 use std::sync::mpsc::channel;
 
@@ -387,7 +387,6 @@ fn update_dialog_without_ln(ui_handle: slint::Weak<AppWindow>, msg: String) {
         ui_handle.set_dialog(old_content + &msg);
     });
 }
-
 ```
 
 第4～5行引入大模型引擎实现模块。第7行用 `slint::include_modules!()` 将编译后的slint界面资源文件加载进来。

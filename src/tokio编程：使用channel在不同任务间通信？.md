@@ -29,7 +29,7 @@ MPSC的特点就是可以有多个生产者，但只有一个消费者。因此�
 
 前面的例子，我们用channel来实现。
 
-```plain
+```rust
 use tokio::sync::mpsc;
 
 #[tokio::main]
@@ -70,7 +70,6 @@ got = 50
 got = 100
 [1, 2, 3, 4, 100, 6, 7, 8, 9, 10]
 ^C
-
 ```
 
 代码第6行，我们使用 `let (tx, mut rx) = mpsc::channel::<u32>(100);` 创建一个channel，注意，这一句使用 `::<u32>` 指定了这个channel中要传输的消息类型，也就是传u32类型的整数，通道容量为100个消息。
@@ -93,7 +92,7 @@ got = 100
 
 我们使用这个特性分析一下前面的示例：task\_a、task\_b、task\_c 创建好之后，实际就已经开始执行了。task\_c 已经在等待channel数据的到来了。第31到33行JoinHandler的await只是在等待任务本身结束而已。我们试着修改一下上面的示例。
 
-```plain
+```rust
 use std::time::Duration;
 use tokio::sync::mpsc;
 use tokio::task;
@@ -145,7 +144,6 @@ in task_a 2
 got = 50
 [1, 2, 3, 4, 50, 6, 7, 8, 9, 10]
 ^C
-
 ```
 
 在这个示例里，我们在task\_a中sleep了3秒（第16行）。同时把 task\_c 放到最前面去 await 了（第39行）。可以看到，task\_b发来的数据先打印，3秒后，task\_a发来的数据打印了。
@@ -166,7 +164,7 @@ tokio::mpsc模块里还有一个函数 `mpsc::unbounded_channel()`，可以用�
 
 tokio其实内置了另外一个好用的东西 Oneshot channel，它可以配合 MPSC Channel 完成我们的任务。Oneshot定义了这样一个模型，这个通道只能用一次，也就是说只能发送一条数据，发送完之后就关闭了，对应的tx和rx就无法再次使用了。这个很适合等待计算结果返回的场景。我们试着用这个新设施来实现一下我们的需求。
 
-```plain
+```rust
 use std::time::Duration;
 use tokio::sync::{mpsc, oneshot};
 use tokio::task;
@@ -237,7 +235,6 @@ got = 50
 [1, 2, 3, 4, 50, 6, 7, 8, 9, 10]
 task_a finished with success.
 ^C
-
 ```
 
 解释一下这个例子，这个例子里的第9行，把消息类型定义成了 `(u32, oneshot::Sender<bool>)`。对，你没看错，是一个元组，元组的第二个元素为oneshot channel 的发送端类型。
@@ -273,7 +270,7 @@ watch通道实际是一个特定化版本的broadcast通道，它有2个特性�
 
 前面示例中task\_c很关键。为什么呢？因为它不但起到了搜集数据执行操作的作用，它还把整个程序阻塞住了，保证了程序的持续运行。那如果一个程序里面没有负责这个任务的角色，应该怎么去搜集其他任务返回的结果呢？我们在 [第 13 讲](https://time.geekbang.org/column/article/725837) 中已经提到了一种方式。
 
-```plain
+```rust
 use tokio::task;
 
 async fn my_background_op(id: i32) -> String {
@@ -297,7 +294,6 @@ async fn main() {
     }
     println!("{:?}", outputs);
 }
-
 ```
 
 上面的代码有两个关键要点。
@@ -307,7 +303,7 @@ async fn main() {
 
 这代表了一种模式。这个模式有个特点，就是要等待前面任务结束，才能拿到后面任务的返回结果。如果前面某个任务执行的时间比较长，即使后面的任务实际已经执行完了，在最后搜集结果的时候，还是需要等前面那个任务结束了后，我们才能搜集到后面任务的结果。比如：
 
-```plain
+```rust
 use std::time::Duration;
 use tokio::task;
 use tokio::time;
@@ -349,14 +345,13 @@ in task_c   // 在这之后会等待 3 秒，然后继续打印
 iterate task result..
 iterate task result..
 [1, 2, 3]
-
 ```
 
 上面的示例创建了三个任务 task\_a、task\_b、task\_c，在task\_a里等待3秒返回，task\_b和task\_c都是立即返回。执行的时候，当打印出 `"in task_c"` 后，会停止3秒左右，然后继续打印剩下的，印证了我们前面的分析。
 
 tokio提供了一个宏 `tokio::join!()`，用来简化上面代码的写法，表示等待所有任务完成后，一起返回一个结果。用法如下：
 
-```plain
+```rust
 use std::time::Duration;
 use tokio::task;
 use tokio::time;
@@ -386,7 +381,6 @@ in task_a
 in task_b
 in task_c
 1, 2, 3
-
 ```
 
 这两个示例基本等价，都是在所有任务中等待最长的那个任务执行完成后，统一返回。你可以想想为什么它们差不多。
@@ -397,7 +391,7 @@ in task_c
 
 针对这种场景，tokio提供了 `tokio::select!()` 宏。用法如下：
 
-```plain
+```rust
 use std::time::Duration;
 use tokio::task;
 use tokio::time;
@@ -442,7 +436,6 @@ in task_a
 in task_c
 in task_b
 3
-
 ```
 
 请注意示例里第21行到第25行的写法，这是 `tokio::select!` 宏定义的语法，不是Rust标准语法。变量r表示任务的返回值。当你多次执行上面代码后，你会发现，输出结果并不固定，你可以想一下为什么会这样。

@@ -41,7 +41,7 @@ let addr = env::args()
 
 有了这个功能，我们就可以得到命令行的初始版本。
 
-```plain
+```rust
 use std::env;
 
 fn main() {
@@ -51,7 +51,6 @@ fn main() {
 
   println!("{}", addr);
 }
-
 ```
 
 检查一下Cargo.toml中的配置，我们的应用名字应该叫 getinfo。
@@ -134,7 +133,7 @@ tokio-util = { version = "0.7.10", features = ["full"] }
 3. 根据指令，获取服务器本地的时间信息。
 4. 将得到的信息字符串写入socket，返回给客户端。
 
-```plain
+```rust
 use std::env;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpListener;
@@ -207,7 +206,6 @@ async fn process(directive: &str) -> String {
         "invalid command".to_owned()
     }
 }
-
 ```
 
 代码中有详细解释，这里我也补充说明一下。
@@ -258,7 +256,7 @@ path = "src/client.rs"
 
 然后把src目录下的 main.rs 改成 server.rs，并创建一个新文件 client.rs，代码如下：
 
-```plain
+```rust
 use std::env;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpStream;
@@ -303,7 +301,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
-
 ```
 
 代码中有详细解释，这里我也做一下补充说明。
@@ -417,7 +414,7 @@ tokio不仅提供了这些默认的简单的编解码方案，它还允许你自
 
 服务端代码：
 
-```plain
+```rust
 use bytes::Bytes;
 use futures::{SinkExt, StreamExt};
 use std::env;
@@ -476,7 +473,6 @@ async fn process(directive: &str) -> String {
         "invalid command".to_owned()
     }
 }
-
 ```
 
 这里我简单解释一下上面的示例。
@@ -485,7 +481,7 @@ async fn process(directive: &str) -> String {
 
 客户端代码：
 
-```plain
+```rust
 use bytes::Bytes;
 use futures::{SinkExt, StreamExt};
 use std::env;
@@ -518,7 +514,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
-
 ```
 
 在连接到服务器，得到连接stream（第13行）后，把它包裹成Frame stream（第15行） ，然后使用 `framed_stream.send()` 发送一条指令，在后面用迭代器方法等待指令执行后返回的内容msg。对msg的处理方式和服务端代码一致。

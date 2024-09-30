@@ -110,7 +110,7 @@ async fn string_handler() -> String {
 
 我们先来看看Axum的Hello World是什么样子。
 
-```plain
+```rust
 use axum::{response::Html, routing::get, Router};
 
 #[tokio::main]
@@ -129,17 +129,15 @@ async fn main() {
 async fn handler() -> Html<&'static str> {
     Html("<h1>Hello, World!</h1>")
 }
-
 ```
 
 这里我给出这个步骤的 [原始代码地址](https://github.com/miketang84/jikeshijian/tree/master/2122-axumapp_stepbystep/axumapp01_helloworld)，你可以直接下载到本地运行。
 
 从这个例子里，我们可以一窥Axum应用的基本结构。首先，一个Axum应用其实就是一个Tokio应用，以标志性的tokio::main属性宏开头。
 
-```plain
+```rust
 #[tokio::main]
 async fn main() {
-
 ```
 
 然后，创建一个Router实例，代表App。在Router中，绑定URL与handler。

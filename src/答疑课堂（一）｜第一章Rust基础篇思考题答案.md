@@ -31,7 +31,7 @@
 
 1. 下面的示例将输出什么？
 
-```plain
+```rust
 fn main() {
     let s = "I am a superman.".to_string();
 
@@ -40,7 +40,6 @@ fn main() {
         println!("s is {}", tmp_s);
     }
 }
-
 ```
 
 1. 一个由固定尺寸类型组成的结构体变量，如下面示例中的Point类型，在赋值给另一个变量时，采用的移动方式还是复制方式？
@@ -60,7 +59,7 @@ struct Point {
 
 修改后如下：
 
-```plain
+```rust
 fn main() {
     let s = "I am a superman.".to_string();
 
@@ -69,7 +68,6 @@ fn main() {
         println!("s is {}", tmp_s);
     }
 }
-
 ```
 
 1. 由于 Point 没有实现 Copy trait，所以在赋值过程中会产生 Move。如果结构体实现了 Copy trait，则会进行复制而不是移动。
@@ -82,7 +80,7 @@ fn main() {
 
 1. 请思考，为何在不可变引用存在的情况下（只是读操作），原所有权变量也无法写入？
 
-```plain
+```rust
 fn main() {
     let mut a: u32 = 10;
     let b = &a;
@@ -90,7 +88,6 @@ fn main() {
 
     println!("{}", b);
 }
-
 ```
 
 1. 请回答，可变引用复制的时候，为什么不允许copy，而是move？
@@ -120,7 +117,7 @@ fn main() {
 
 Rust中 `char` 是用于存放unicode单个字符的类型（固定4个字节）。String类型只能放在堆上，通过引用所有权的形式和变量绑定，它的存储方式不是简单的char数组，而是utf8编码的字节序列，所以单独取这个序列的某一段切片，不一定能解析出具体的字符（程序里的 `String[a..b]`，这里的a和b已经是经过特殊处理的保证截取的有效性）。
 
-```plain
+```rust
 fn main() {
     let s = "abcdefghijk".to_string();
     let a = &s[..5];
@@ -131,7 +128,6 @@ fn main() {
      Running `target/debug/playground`
 thread 'main' panicked at src/main.rs:7:15:
 byte index 5 is not a char boundary; it is inside '爱' (bytes 3..6) of `我爱中国`
-
 ```
 
 如果能取得有效的序列片段那就是str类型，但是程序里凡是用到绑定str类型变量的地方，则必须都是引用形式存在的（&str），因为str是引用的原始片段的那段真实数据，而&str类型是一个FatPointer，它包括引用目标的起始地址和长度，所以str和&str是完全两个不同的概念。
@@ -150,7 +146,7 @@ u8就是一个存储0到255大小的类型，因为一个字节就是8位，所�
 
 基本数据类型无法实现impl，不过我们可以通过 trait给基本数据类型添加操作的方式来实现。
 
-```plain
+```rust
 trait Operate {
   fn plus(self) -> Self;
 }
@@ -165,7 +161,6 @@ fn main() {
     let  a = 1i8;
     println!("{}",a.plus());
 }
-
 ```
 
 另外可以用newtype模式对 `i8` 封装一下，再impl。
@@ -288,7 +283,7 @@ Rust生命周期的独特设计，导致了该语言需要设计一些处理方�
 
 通过下面的程序可以测试出来：
 
-```plain
+```rust
 fn doit3(t1: &dyn TraitA, t2: Box) {
      println!("{:?}", t1);
      println!("{:?}", t2)
@@ -311,7 +306,6 @@ error[E0382]: borrow of moved value: b
  28 |     println!("{:?}", a);
  29 |     println!("{:?}", b);
     |                      ^ value borrowed here after move
-
 ```
 
 答案来自哄哄、鸠摩智和-Hedon 🍭
@@ -328,7 +322,7 @@ error[E0382]: borrow of moved value: b
 
 **Deref trait 通常与智能指针一起使用**。当我们编写 Rust 代码时，分配在堆上的值通常不是通过拷贝的方式传递或返回，而是通过使用指向它们的指针（智能指针）来传递或返回。Deref trait 可以强制将智能指针转换成指针，从而可以使用类似于 \* 操作符这样的解引用语法访问指针指向的值。例如：
 
-```plain
+```rust
 struct MyInt(i32);
 
 impl Deref for MyInt {
@@ -343,14 +337,13 @@ fn main() {
     let my_int = MyInt(42);
     assert_eq!(*my_int, 42);
 }
-
 ```
 
 在上面的代码中，我们定义了一个 `MyInt` 结构体，它包含一个 i32 类型的值。我们实现了 Deref trait，并指定了目标类型为 i32。我们在 `deref` 方法中返回了 `self.0`，即指向 `MyInt` 中的 i32 值的引用。这样，我们就可以在 `main` 函数中使用 `*my_int` 访问这个 i32 值。
 
 相比之下， **AsRef trait 更加通用**。它只是将类型的引用转换为其他类型的引用。一种常见的用途是将各种字符串类型统一转换为&str类型。例如：
 
-```plain
+```rust
 fn do_something<T: AsRef<str>>(input: T) {
     let bytes = input.as_ref().as_bytes();
     // Do something with the bytes...
@@ -360,7 +353,6 @@ fn main() {
     let my_str = "hello".to_string();
     do_something(my_str);
 }
-
 ```
 
 在上面的代码中，我们定义了一个 `do_something` 函数，它接受任何实现了 `AsRef<str>` trait 的值。在函数内部，我们首先使用 `as_ref` 方法将输入值转换为 `&str` 类型，然后使用 `as_bytes` 方法将 `&str` 类型转换为 `&[u8]` 类型。这样，我们就可以在函数中使用字节数组操作 `bytes` 了。在 `main` 函数中，我们传递了一个所有权字符串，它在函数中，使用 as\_ref() 转换成了 `&str` 类型。

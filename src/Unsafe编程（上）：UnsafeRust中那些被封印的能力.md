@@ -48,7 +48,7 @@ assert_eq!(unsafe { u.f }, 2.0);
 
 第3点也就是全局静态变量，前面我不提倡修改它，因为它是一种不太好的编程模型。但是如果你非要改的话，也是有办法的，那就留下足迹，加个 `unsafe {}` 套起来，比如 the book 里的 [示例](https://doc.rust-lang.org/book/ch19-01-unsafe-rust.html#accessing-or-modifying-a-mutable-static-variable)。
 
-```plain
+```rust
 // 这里修饰为 mut
 static mut COUNTER: u32 = 0;
 fn add_to_count(inc: u32) {
@@ -66,7 +66,6 @@ fn main() {
 }
 // 输出
 COUNTER: 3
-
 ```
 
 下面我来重点讲解一下前2种场景。
@@ -88,7 +87,7 @@ unsafe {
 
 请注意上面这句话的用词，“不交由Rustc全权保证安全的代码部分”并不是说Rustc编译器就完全不检查 unsafe 里的代码了，实际Rustc只是对上面提到的5种技能不加检查。对于Safe Rust里的内容还是要做检查，跟之前一样。我们来看一个示例。
 
-```plain
+```rust
 fn main() {
     let v = [1,2,3];
 
@@ -110,7 +109,6 @@ error: this operation will panic at runtime
   |
 5 |         println!("COUNTER: {}", v[3]);
   |                                 ^^^^ index out of bounds: the length is 3 but the index is 3
-
 ```
 
 示例中，我们需要重点关注 array 的下标索引越界的问题。我们在 [第 1 讲](https://time.geekbang.org/column/article/718865) 里已经讲过，array的下标索引越界会在编译期被检查出来，可以看到，即使放在 unsafe block 中，它仍然执行了检查。这印证了我们上面的说法： **被 unsafe 标识的代码，并不是让Rustc完全不管，而只是某几种技能让Rustc不管**。Safe Rust中的那些元素，Rustc该管的还是要管。
@@ -121,7 +119,7 @@ error: this operation will panic at runtime
 
 Rust中有两种原始指针（raw pointer）， `*const T` 和 `*mut T`。用法如下：
 
-```plain
+```rust
 fn main() {
     let my_num: i32 = 10;
     let my_num_ptr: *const i32 = &my_num;
@@ -136,7 +134,6 @@ fn main() {
 // 输出
 my_num is: 10
 my_speed is: 88
-
 ```
 
 也就是可以将不可变引用 `&T` 转换成 `*const T` 指针。将可变引用 `&mut T` 转换成 `*mut T` 指针。你也可以用 [as 操作符](https://doc.rust-lang.org/book/ch19-01-unsafe-rust.html#dereferencing-a-raw-pointer) 来转换。
@@ -152,7 +149,7 @@ my_speed is: 88
 
 `Box<T>` 是带所有权的智能指针，它有一个 `into_raw()` 函数可以转换成原始指针。这个转换对于内存里的资源没有影响。但是要再从raw pointer转回Box就要放在 unsafe 里包起来， `Box::from_raw()` 是 unsafe 的。
 
-```plain
+```rust
 fn main() {
     let my_speed: Box<i32> = Box::new(88);
     let my_speed: *mut i32 = Box::into_raw(my_speed);
@@ -161,7 +158,6 @@ fn main() {
         let _ = Box::from_raw(my_speed);
     }
 }
-
 ```
 
 这实际上也是对原始指针解引用的一个变形，所以要放在 unsafe 块里。
@@ -172,7 +168,7 @@ fn main() {
 
 可以用 std::ptr 里的 `null()` 和 `null_mut()` 生成两种原始空指针。
 
-```plain
+```rust
 fn main() {
     use std::ptr;
 
@@ -181,7 +177,6 @@ fn main() {
     let p: *mut i32 = ptr::null_mut();
     assert!(p.is_null());
 }
-
 ```
 
 Rust中为什么会有空指针存在？有什么作用呢？那是因为C语言中有空指针这个东西。为了与C打交道，Rust中要有对应的设计，好与C库或者C应用程序对接，毕竟在Rust出来之前，C/C++ 已经建成了这个软件世界的地基。
@@ -190,7 +185,7 @@ Rust中为什么会有空指针存在？有什么作用呢？那是因为C语言
 
 在Rust中，unsafe函数必须在 unsafe 函数中调用，或使用 `unsafe {}` 块包起来调用。因此下面的代码是可以的：
 
-```plain
+```rust
 fn foo() {
     let my_num_ptr = &10 as *const i32;
     let my_speed_ptr = &mut 88 as *mut i32;
@@ -204,7 +199,6 @@ fn foo() {
 fn main() {
     foo();
 }
-
 ```
 
 可以看到， `foo()` 函数中包含了 unsafe 块的调用。但是从 `main()` 函数的角度来看，它调用 `foo()` 时不需要在外面再套一层 `unsafe {}` 来调用了。这里实际体现了重要的一点， **Unsafe 与 Safe 的边界**。示例代码里两者的边界就在 `foo()` 函数中。
@@ -213,7 +207,7 @@ fn main() {
 
 我们再来看一个实际一点的例子。
 
-```plain
+```rust
 use std::slice;
 fn split_at_mut(values: &mut [i32], mid: usize) -> (&mut [i32], &mut [i32]) {
     let len = values.len();
@@ -230,7 +224,6 @@ fn main() {
     let mut vector = vec![1, 2, 3, 4, 5, 6];
     let (left, right) = split_at_mut(&mut vector, 3);
 }
-
 ```
 
 上面函数将一个 i32 数组的 slice 可变引用分成了前后两段slice可变引用。这在 Safe Rust 是做不到的，因为同时对原数组存在了两个可变引用，详情请看 [官方书](https://doc.rust-lang.org/book/ch19-01-unsafe-rust.html#creating-a-safe-abstraction-over-unsafe-code)。
@@ -271,7 +264,7 @@ Rust标准库中有一些unsafe函数，我们来看两个。
 
 ### Slice的 [get\_unchecked()](https://doc.rust-lang.org/std/primitive.slice.html\#method.get_unchecked) 函数
 
-```plain
+```rust
 fn main() {
     let x = &[1, 2, 4];
 
@@ -279,14 +272,13 @@ fn main() {
         assert_eq!(x.get_unchecked(1), &2);
     }
 }
-
 ```
 
 在有 `get()` 的情况下，Rust标准库还提供这个 `get_unchecked()` 函数，原因其实也很简单，因为 `get()` 会进行边界检查，而 `get_unchecked()` 不会。在有些密集运算的情况下，边界检查对性能影响比较大，因此提供一个不做边界检查的版本，用来追求极致的速度。毕竟，Rust是一门与C/C++在同一层次的语言，不应该给Rust人为呆板地设置障碍，比如必须使用边界检查的安全版本。
 
 ### str的 [from\_utf8\_unchecked()](https://doc.rust-lang.org/std/str/fn.from_utf8_unchecked.html) 函数
 
-```plain
+```rust
 fn main() {
     use std::str;
 
@@ -297,7 +289,6 @@ fn main() {
 
     assert_eq!("💖", sparkle_heart);
 }
-
 ```
 
 这个函数我们在 [第 4 讲](https://time.geekbang.org/column/article/720426) 聊字符串的时候提到过，它不检查字节序列为有效的UTF8编码，因此转出来可能不是有效的字符串。原因也很简单，还是为了性能。在有些场合下，绝对的性能就是绝对的王道，Rust不给你设置天花板。

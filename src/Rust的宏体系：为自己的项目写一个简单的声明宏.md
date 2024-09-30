@@ -103,7 +103,7 @@ let c = vec! { 0, 1, 2 };
 
 你可以看一下示例代码。
 
-```plain
+```rust
 macro_rules! add {
     // 第一个分支，匹配两个元素的加法
     ($a:expr, $b:expr)=>{
@@ -124,7 +124,6 @@ fn main(){
     let sum = add!(1,2);  // 调用宏
     let sum = add!(x);
 }
-
 ```
 
 通过示例我们可以看到，声明宏里面可以写多个匹配分支，Rust会根据匹配到的模式自动选择适配的分支进行套用。
@@ -135,7 +134,7 @@ fn main(){
 
 展开后实际是下面这个样子。
 
-```plain
+```rust
 #![feature(prelude_import)]
 #[prelude_import]
 use std::prelude::rust_2021::*;
@@ -161,12 +160,11 @@ fn main() {
     let sum = { 1 + 2 }; // 调用宏
     let sum = { x };
 }
-
 ```
 
 请你仔细对比展开前后的代码，好好理解一下。不过，仅仅是两个元素的相加，写个宏好像多此一举了。下面我们把它扩展到多个数字的加法。
 
-```plain
+```rust
 macro_rules! add {
     ( $($a:expr),* ) => {
        {
@@ -182,12 +180,11 @@ fn main(){
     let sum = add!();
     let sum = add!(1,2,3,4);
 }
-
 ```
 
 你可以看一下它展开后的样子。
 
-```plain
+```rust
 #![feature(prelude_import)]
 #[prelude_import]
 use std::prelude::rust_2021::*;
@@ -204,7 +201,6 @@ macro_rules! add {
     }
 }
 fn main() { let sum = { 0 }; let sum = { 0 + 1 + 2 + 3 + 4 }; }
-
 ```
 
 可以看到，经过简单的改造，我们的 `add!()` 宏现在能处理无限多的相加项了。如果有时间，你可以进一步考虑如何处理总和溢出的问题。

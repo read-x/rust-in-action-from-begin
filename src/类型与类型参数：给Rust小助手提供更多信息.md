@@ -27,14 +27,13 @@ let b = a as u64;
 
 但是 `u32` 不能直接转换到String上去。
 
-```plain
+```rust
 fn main() {
     let a: u32 = 10;
     let b = a as String;    // 错误的
 
     println!("{b}");
 }
-
 ```
 
 ### 类型化的好处
@@ -45,14 +44,13 @@ Rust语言非常强调 **类型化**，它的类型系统非常严格，隐式�
 
 比如下面这个代码：
 
-```plain
+```rust
 fn main() {
     let a = 1.0f32;
     let b = 10;
 
     let c = a * b;
 }
-
 ```
 
 编译错误，提示你不能将一个浮点数和一个整数相乘。
@@ -79,14 +77,13 @@ error[E0277]: cannot multiply `f32` by `{integer}`
 
 修改上述代码如下：
 
-```plain
+```rust
 fn main() {
     let a = 1.0f32;
     let b = 10 as f32;    // 添加了 as f32
 
     let c = a * b;
 }
-
 ```
 
 这段代码就可以编译通过了。
@@ -106,12 +103,11 @@ fn main() {
 
 而在Rust中， `9+"1"` 是不可能通过编译的，更不要说计算出一个神奇的结果了。如果要写出类似的代码，在Rust中可以这样做。
 
-```plain
+```rust
 fn main() {
     let a = 9 + '1' as u8;
     let b = 9.to_string() + "1";
 }
-
 ```
 
 有没有觉得特别清晰！我们一眼就能推断出 a 和 b 的类型，a为u8类型，b为String类型。
@@ -168,7 +164,7 @@ struct Point<T> {
 
 我们来看这个Point结构体类型如何实例化。
 
-```plain
+```rust
 struct Point<T> {
     x: T,
     y: T,
@@ -178,12 +174,11 @@ fn main() {
     let integer = Point { x: 5, y: 10 };     // 一个整数point
     let float = Point { x: 1.0, y: 4.0 };    // 一个浮点数point
 }
-
 ```
 
 符合我们预期，正常编译通过。那如果实例化的时候，给x和y赋予不同的类型值会怎样呢？我们来试试。
 
-```plain
+```rust
 struct Point<T> {
     x: T,
     y: T,
@@ -200,7 +195,6 @@ error[E0308]: mismatched types
   |
 7 |     let wont_work = Point { x: 5, y: 4.0 };
   |                                      ^^^ expected integer, found floating-point number
-
 ```
 
 编译器正确地指出了问题，说期望整数却收到了浮点数，所以不通过。
@@ -209,7 +203,7 @@ error[E0308]: mismatched types
 
 那么，如何解决这个问题呢？Rust并没有限制我们只能定义一个类型参数呀！定义多个就好了，把x分量和y分量定义成不同的参数化类型。
 
-```plain
+```rust
 struct Point<T, U> {
     x: T,
     y: U,
@@ -220,7 +214,6 @@ fn main() {
     let both_float = Point { x: 1.0, y: 4.0 };
     let integer_and_float = Point { x: 5, y: 4.0 };
 }
-
 ```
 
 像这样，代码就可以顺利通过编译了。
@@ -229,7 +222,7 @@ fn main() {
 
 在使用的时候，可以用turbofish语法 `::<>` 明确地给泛型，或者说是给Rust编译器提供类型参数信息，我们修改一下上面两个示例。
 
-```plain
+```rust
 struct Point<T> {
     x: T,
     y: T,
@@ -239,10 +232,9 @@ fn main() {
     let integer = Point::<u32> { x: 5, y: 10 };
     let float = Point::<f32> { x: 1.0, y: 4.0 };
 }
-
 ```
 
-```plain
+```rust
 struct Point<T, U> {
     x: T,
     y: U,
@@ -253,7 +245,6 @@ fn main() {
     let both_float = Point::<f32, f32> { x: 1.0, y: 4.0 };
     let integer_and_float = Point::<u32, f32> { x: 5, y: 4.0 };
 }
-
 ```
 
 注意，使用时提供类型参数信息用的是 `::<>`，而定义类型参数的时候只用到 `<>`，注意它们的区别。Rust把定义和使用两个地方通过语法明确地区分开了，而有的语言并没有区分这两个地方。
@@ -355,7 +346,7 @@ enum Aaa<T, U> {
 
 示例：
 
-```plain
+```rust
 struct PointU32 {
     x: u32,
     y: u32,
@@ -381,7 +372,6 @@ fn main() {
     let p = PointF32 {x: 10.2, y: 20.4};
     print_f32(p);
 }
-
 ```
 
 上面示例中，因为我们没有使用类型参数，那就得针对不同的字段类型（u32，f32）分别定义结构体（PointU32，PointF32）和对应的打印函数（print\_u32，print\_f32），并分别调用。
@@ -390,7 +380,7 @@ fn main() {
 
 上面的代码可以优化成这样：
 
-```plain
+```rust
 struct Point<T> {
     x: T,
     y: T,
@@ -407,7 +397,6 @@ fn main() {
     let p = Point {x: 10.2, y: 20.4};
     print(p);
 }
-
 ```
 
 是不是清爽多了！
@@ -431,7 +420,7 @@ fn print<T: std::fmt::Display>(p: Point<T>) {
 
 示例：
 
-```plain
+```rust
 struct Point<T> {
     x: T,
     y: T,
@@ -449,14 +438,13 @@ fn main() {
 }
 // 输出
 p.x = 5
-
 ```
 
 上面的示例中， `Point<T>` 的方法 `x()` 的返回值类型就是 &T，使用到了 `impl<T>` 这里定义的类型参数T。
 
 下面我们继续看更复杂的内容，方法中的类型参数和结构体中的类型参数可以不同。
 
-```plain
+```rust
 struct Point<X1, Y1> {
     x: X1,
     y: Y1,
@@ -485,7 +473,6 @@ fn main() {
 
 // 输出
 p3.x = 5, p3.y = c
-
 ```
 
 可以看到，我们在 `Point<X3, Y3>` 的方法 `mixup()` 上新定义了两个类型参数X2、Y2，于是在 `mixup()` 方法中，可以同时使用4个类型参数：X2、Y2、X3、Y3。你可以品味一下这个示例，不过这种复杂情况，现在的你只需要了解就可以了。

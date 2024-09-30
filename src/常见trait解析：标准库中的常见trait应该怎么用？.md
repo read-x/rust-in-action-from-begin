@@ -21,7 +21,7 @@ trait Default {
 
 ```
 
-```plain
+```rust
 struct Color(u8, u8, u8);
 impl Default for Color {
     // 默认颜色是黑色 (0, 0, 0)
@@ -35,7 +35,6 @@ fn main() {
     // 或
     let color: Color = Default::default();
 }
-
 ```
 
 还有其他一些地方用到了Default，比如 `Option<T>` 的 `unwrap_or_default()`，在类型参数上调用 `default()` 函数。
@@ -132,7 +131,7 @@ Display trait对应于格式化符号 `"{}"`，比如 `println!("{}", s)`，用�
 
 示例：
 
-```plain
+```rust
 use std::fmt;
 #[derive(Default)]
 struct Point {
@@ -154,7 +153,6 @@ fn main() {
     let stringified = format!("{}", Point::default());
     assert_eq!("(0, 0)", stringified); // ✅
 }
-
 ```
 
 ### ToString
@@ -324,7 +322,7 @@ trait Add<Rhs = Self> {
 
 像下面我给出的这个示例一样去使用它就可以，非常简单。
 
-```plain
+```rust
 struct Point {
     x: i32,
     y: i32,
@@ -348,7 +346,6 @@ fn main() {
     assert_eq!(p3.x, p1.x + p2.x); // ✅
     assert_eq!(p3.y, p1.y + p2.y); // ✅
 }
-
 ```
 
 实际上，Rust标准库提供了一套完整的与运算符对应的trait，你在 [这里](https://doc.rust-lang.org/std/ops/index.html) 可以找到可重载的运算符。你可以按类似的方式练习如何自定义各种运算符。
@@ -425,7 +422,7 @@ struct SomeType;
 
 Copy和Clone的区别是，Copy是浅拷贝只复制一层，不会去深究这个值里面是否有到其他内存资源的引用，比如一个字符串的动态数组。
 
-```plain
+```rust
 struct Atype {
     num: u32,
     a_vec: Vec<u32>,
@@ -437,14 +434,13 @@ fn main() {
     };
     let b = a;  // 这里发生了移动
 }
-
 ```
 
 代码第10行的操作是将a的所有权移动给b（ [第 2 讲](https://time.geekbang.org/column/article/718916) 的内容）。
 
 如果我们给这个结构体实现了Clone trait的话，我们可以调用.clone() 来产生一份新的所有权。
 
-```plain
+```rust
 #[derive(Clone, Debug)]
 struct Atype {
     num: u32,
@@ -467,7 +463,6 @@ fn main() {
 // 输出
 Atype { num: 100, a_vec: [10, 20, 30] }
 Atype { num: 200, a_vec: [11, 21, 31] }
-
 ```
 
 通过例子可以看到，clone()一份新的所有权出来，b改动的值不影响a的值。
@@ -490,7 +485,7 @@ error[E0204]: the trait `Copy` cannot be implemented for this type
 
 一旦一个类型实现了Copy，它就会具备一个特别重要的特性： **再赋值的时候会复制一份自身**。那么就相当于新创建一份所有权。我们来看下面这个值全在栈上的类型。
 
-```plain
+```rust
 #[derive(Clone)]
 struct Point {
     x: u32,
@@ -501,12 +496,11 @@ fn main() {
   let a = Point {x: 10, y: 10};
   let b = a; // 这里发生了所有权move，a在后续不能使用了
 }
-
 ```
 
 我们对 Point 实现Clone和Copy。
 
-```plain
+```rust
 #[derive(Copy, Clone)]
 struct Point {
     x: u32,
@@ -518,7 +512,6 @@ fn main() {
   let b = a; // 这里发生了复制，a在后续可以继续使用
   let c = a; // 这里又复制了一份，这下有3份了
 }
-
 ```
 
 仔细体会一下，现在你知道我们在第2讲里面讲到的复制与移动的语义区别根源在哪里了吧！
@@ -636,21 +629,20 @@ let get_range_count = || range.count();
 
 FnOnce代表的闭包类型只能被调用一次，比如；
 
-```plain
+```rust
 fn main() {
     let range = 0..10;
     let get_range_count = || range.count();
     assert_eq!(get_range_count(), 10); // ✅
     get_range_count(); // ❌
 }
-
 ```
 
 再调用就报错了。
 
 FnMut代表的闭包类型能被调用多次，并且能修改上下文环境变量的值，不过有一些副作用，在某些情况下可能会导致错误或者不可预测的行为。比如：
 
-```plain
+```rust
 fn main() {
     let nums = vec![0, 4, 2, 8, 10, 7, 15, 18, 13];
     let mut min = i32::MIN;
@@ -664,24 +656,22 @@ fn main() {
     }).collect::<Vec<_>>();
     assert_eq!(vec![0, 4, 8, 10, 15, 18], ascending); // ✅
 }
-
 ```
 
 Fn 代表的这类闭包能被调用多次，但是对上下文环境变量没有副作用。比如：
 
-```plain
+```rust
 fn main() {
     let nums = vec![0, 4, 2, 8, 10, 7, 15, 18, 13];
     let min = 9;
     let greater_than_9 = nums.into_iter().filter(|&n| n > min).collect::<Vec<_>>();
     assert_eq!(vec![10, 15, 18, 13], greater_than_9); // ✅
 }
-
 ```
 
 另外，fn这种函数指针，用在不需要捕获上下文环境变量的场景，比如：
 
-```plain
+```rust
 fn add_one(x: i32) -> i32 {
     x + 1
 }
@@ -694,7 +684,6 @@ fn main() {
     fn_ptr = |x| x + 1; // same as add_one
     assert_eq!(fn_ptr(1), 2); // ✅
 }
-
 ```
 
 ### `From<T>` 和 `Into<T>`

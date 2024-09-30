@@ -211,7 +211,7 @@ Rust String -> slint string:  .into()
 
 接下来，我们看main文件内容。
 
-```plain
+```rust
 use std::{path::PathBuf, sync::mpsc::channel};
 
 use native_dialog::FileDialog;
@@ -317,7 +317,6 @@ fn load_image(path: std::path::PathBuf) -> slint::Image {
 
     image
 }
-
 ```
 
 main文件整体结构和上一讲差不多。这里我重点讲一下不同的地方。Slint里没有现成的文件选择组件，因此我们使用了 native\_dialog 这个 crate，它是一个跨平台的文件选择组件。FileDialog 这一段返回后的 path 是一个 `Option<PathBuf>`。如果选择了文件，就会是 `Some(path)`，如果没有选择文件，比如打开了文件选择框，但是又点击了取消按钮或者关闭按钮，就返回 None。

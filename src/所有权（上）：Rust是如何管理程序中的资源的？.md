@@ -42,14 +42,13 @@ Rust语言因为在设计时就定位为一门通用的编程语言（对标C++�
 
 默认变量是不可变的，我们来做个实验。
 
-```plain
+```rust
 fn main() {
     let x = 5;
     println!("The value of x is: {x}");
     x = 6;
     println!("The value of x is: {x}");
 }
-
 ```
 
 输出：
@@ -75,27 +74,25 @@ Rust默认这样做是为了减少一些很低级的Bug。假如默认可以改�
 
 但是下面这样做是可以的。
 
-```plain
+```rust
 fn main() {
     let x = 5;
     println!("The value of x is: {x}");
     let x = 6;    // 注意这里，重新使用了 let 来定义新变量
     println!("The value of x is: {x}");
 }
-
 ```
 
 这种方式在Rust中叫做变量的Shadowing。意思很好理解，就是定义了一个新的变量名，只不过这个变量名和老的相同。原来那个变量就被遮盖起来了，访问不到了。这种方式最大的用处是程序员不用再去费力地想另一个名字了！变量的Shadow甚至支持新的变量的类型和原来的不一样。
 
 比如：
 
-```plain
+```rust
 fn main() {
     let a = 10u32;
     let a = 'a';
     println!("{}", a);
 }
-
 ```
 
 那如果我们要修改变量的值应该怎么做呢？只需要在变量名前面加一个mut就可以声明一个变量为可以修改内容的。
@@ -107,7 +104,7 @@ let mut x = 10u32;
 
 例子：
 
-```plain
+```rust
 fn main() {
     let mut x = 5;
     println!("The value of x is: {x}");
@@ -117,7 +114,6 @@ fn main() {
 // 输出
 The value of x is: 5
 The value of x is: 6
-
 ```
 
 注意，值的改变只能在同一种类型中变化，在变量x定义的时候，就已经确定了变量x的类型为数字了，你可以试试将其改成字符串，看会报什么错误。
@@ -144,12 +140,11 @@ The value of x is: 6
 
 比如输入下面这段代码：
 
-```plain
+```rust
 fn main() {
     let a: u8 = 323232;
     println!("{a}");
 }
-
 ```
 
 编译器就会报错，指出u8类型装不下这么大的一个数字。
@@ -175,14 +170,13 @@ error: literal out of range for `u8`
 
 我们先来看一个例子。
 
-```plain
+```rust
 fn main() {
     let a = 10u32;
     let b = a;
     println!("{a}");
     println!("{b}");
 }
-
 ```
 
 很简单，它打印出：
@@ -195,14 +189,13 @@ fn main() {
 
 然后我们再来看字符串的行为，你猜一下程序会输出什么。
 
-```plain
+```rust
 fn main() {
     let s1 = String::from("I am a superman.");
     let s2 = s1;
     println!("{s1}");
     println!("{s2}");
 }
-
 ```
 
 是两行“I am a superman”吗？反正在其他语言中是这样的。
@@ -236,14 +229,13 @@ help: consider cloning the value if the performance cost is acceptable
 
 既然给出了修改建议，那我们直接照着代码建议改一下试试。
 
-```plain
+```rust
 fn main() {
     let s1 = String::from("I am a superman.");
     let s2 = s1.clone();
     println!("{s1}");
     println!("{s2}");
 }
-
 ```
 
 好了，这下输出我们预期的结果了。
@@ -266,14 +258,13 @@ Rust中的字符串为何有如此奇怪的行为呢？
 
 回到Rust，我们看到对于u32这种固定尺寸类型来说，Rust与Java也是同样的处理，直接在栈上进行内容的拷贝。而对于字符串这种动态长度的类型来说，在变量的再赋值上，Rust除了拷贝字符串的引用外，实际还做了更多事情。具体是什么事情呢？我们先来看一下修改后的例子。
 
-```plain
+```rust
 fn main() {
     let s1 = String::from("I am a superman.");
     let s2 = s1;
     //println!("{s1}");
     println!("{s2}");
 }
-
 ```
 
 这个例子，就能正常打印。
@@ -315,7 +306,7 @@ Rust明确了所有权的概念，值也可以叫资源，所有权就是拥有�
 
 比如：
 
-```plain
+```rust
 fn main() {
     let s = String::from("hello");
     // do stuff with s
@@ -329,33 +320,30 @@ fn main() {
     // xxxx
 
 }  // 变量a的作用域到这里结束
-
 ```
 
 变量在其作用域内是有效的，离开作用域就无效了。
 
 好，理解了这一点，我们现在尝试用所有权规则去翻新一下对前面例子的理解。
 
-```plain
+```rust
 fn main() {
     let a = 10u32;
     let b = a;
     println!("{a}");
     println!("{b}");
 }
-
 ```
 
 在这个例子中，a具有对值 10u32的所有权。执行 `let b = a` 的时候，把值 10u32 复制了一份，b具有对这个新的10u32值的所有权。当main函数结束的时候，a、b两个变量就离开了作用域，其对应的两个10u32，就都被回收了。这里是栈帧结束，栈帧内存被回收，局部变量位于栈帧中，所以它们所占用的内存就被回收了。
 
 再来看一个字符串的例子。
 
-```plain
+```rust
 fn main() {
     let s1 = String::from("I am a superman.");
     println!("{s1}");
 }
-
 ```
 
 局部变量s1拥有这个字符串的所有权。s1的作用域从定义到开始，直到花括号结束。s1（栈帧上的局部变量）离开作用域时，变量s1上绑定的内存资源（字符串）就被回收掉了。注意，这里发生的事情是，栈帧中的局部变量离开作用域了，顺带要求堆内存中的字符串资源被回收。之所以能够做到这一点，是因为这个堆中的字符串资源被栈帧中的局部变量所指向了的。
@@ -366,14 +354,13 @@ fn main() {
 
 有了所有权的知识后，我们再回过头来分析上面那个例子。
 
-```plain
+```rust
 fn main() {
     let s1 = String::from("I am a superman.");
     let s2 = s1;
     //println!("{s1}");
     println!("{s2}");
 }
-
 ```
 
 变量s1持有这个字符串的所有权。s1对字符串的所有权从第2行定义时开始，到 `let s2 = s1` 执行后结束。这一行执行后，s2持有那个字符串的所有权。而此时s1处于什么状态呢？处于一种不可用的状态，或者叫无效状态（invalid），这个状态是由Rust编译器在编译阶段帮我们管理的，我们只需要从所有权模型去理解它，而不需要操心细节。Rustc小助手把这些事情给我们打理得明明白白的。
@@ -390,7 +377,7 @@ fn main() {
 
 下面我们来看一下，基于所有权规则，函数的写法会变成什么样。
 
-```plain
+```rust
 fn foo(s: String) {
     println!("{s}");
 }
@@ -399,7 +386,6 @@ fn main() {
     let s1 = String::from("I am a superman.");
     foo(s1);
 }
-
 ```
 
 输出：
@@ -413,7 +399,7 @@ I am a superman.
 
 稍微改动一下例子，我们想在函数调用结束后，在外面再打印一下s1的值。
 
-```plain
+```rust
 fn foo(s: String) {
     println!("{s}");
 }
@@ -423,7 +409,6 @@ fn main() {
     foo(s1);
     println!("{s1}");    // 这里加了一行
 }
-
 ```
 
 咦，编译出错了。提示：
@@ -470,7 +455,7 @@ help: consider cloning the value if the performance cost is acceptable
 
 同样我们再看一个上面例子的变形。
 
-```plain
+```rust
 fn foo(s: String) {
     println!("{s}");
 }
@@ -480,7 +465,6 @@ fn main() {
     foo(s1);
     foo(s1);
 }
-
 ```
 
 我们简单地想调用两次 `foo()` 函数都做不到，原因跟前面是一样的。这就是Rust有点反直觉的地方，也是令很多初学者崩溃的地方。原因我们再重复一下，一个苹果，你给了别人，那你就没有了。一个知识，我教给了你，我们都会得到。Rust的编程模型默认选择了前者，而以往的主流编程语言默认选择了后者。
@@ -489,7 +473,7 @@ fn main() {
 
 可以这样，既然能把所有权移动到函数里面，也当然能把所有权转移出来。
 
-```plain
+```rust
 fn foo(s: String) -> String {
     println!("{s}");
     s
@@ -500,7 +484,6 @@ fn main() {
     let s1 = foo(s1);
     println!("{s1}");
 }
-
 ```
 
 这样就输出了结果：
@@ -543,7 +526,7 @@ I am a superman.
 
 1. 下面的示例将输出什么？
 
-```plain
+```rust
 fn main() {
     let s = "I am a superman.".to_string();
 
@@ -552,7 +535,6 @@ fn main() {
         println!("s is {}", tmp_s);
     }
 }
-
 ```
 
 1. 一个由固定尺寸类型组成的结构体变量，如下面示例中的Point类型，在赋值给另一个变量时，采用的是移动方式还是复制方式？

@@ -22,7 +22,7 @@ trait用中文来讲就是特征，但是我倾向于不翻译。因为 trait �
 
 我们先回忆一下 [第 7 讲](https://time.geekbang.org/column/article/722240) 的一个例子。
 
-```plain
+```rust
 struct Point<T> {
     x: T,
     y: T,
@@ -42,7 +42,6 @@ fn main() {
 // 输出
 Point 10, 20
 Point 10.2, 20.4
-
 ```
 
 注意代码里的第六行。
@@ -56,7 +55,7 @@ fn print<T: std::fmt::Display>(p: Point<T>) {
 
 我们看一下如果一个类型没有实现Display，把它代入 print() 函数，会发生什么。
 
-```plain
+```rust
 struct Point<T> {
     x: T,
     y: T,
@@ -78,7 +77,6 @@ fn main() {
     let p = Point {x: Foo, y: Foo};  // 初始化一个Point<T> 实例
     print(p);
 }
-
 ```
 
 报编译错误：
@@ -284,7 +282,7 @@ fn main () {
 
 在trait中，可以带一个或多个关联类型。关联类型起一种类型占位功能，定义trait时声明，在把trait实现到类型上的时候为其指定具体的类型。比如：
 
-```plain
+```rust
 pub trait Sport {
     type SportType;
 
@@ -306,7 +304,6 @@ fn main() {
   let f = Football;
   f.play(SportType::Land);
 }
-
 ```
 
 解释一下，我们在给Football类型实现Sport trait的时候，指明具体的关联类型SportType为一个枚举类型，用来区分陆地运动与水上运动。注意看trait中的play方法的第二个参数，它就是用的关联类型占位。
@@ -328,7 +325,7 @@ Iterator定义了一个关联类型Item。注意这里的 `Self::Item` 实际是
 
 比如：
 
-```plain
+```rust
 trait TraitA {
   type Mytype;
 }
@@ -343,7 +340,6 @@ impl TraitA for TypeA {
 fn main() {
   doit::<TypeA>("abc".to_string());  // 给Rustc小助手喂信息：T具化为TypeA
 }
-
 ```
 
 上面示例在 `doit()` 函数中使用了TraitA中的关联类型，用的是 `T::Mytype` 这种路由/路径形式。在 `main()` 函数中调用 `doit()` 函数时，手动把类型参数T具化为TypeA。你可以多花一些时间熟悉一下这种表达形式。
@@ -352,7 +348,7 @@ fn main() {
 
 在指定约束的时候，可以把关联类型具化。你可以看一下我给出的示例。
 
-```plain
+```rust
 trait TraitA {
     type Item;
 }
@@ -369,7 +365,6 @@ fn main() {
         x: A,
     };
 }
-
 ```
 
 上面的代码在约束表达式中对关联类型做了具化，具化为 String 类型。
@@ -381,7 +376,7 @@ T: TraitA<Item=String>
 
 这样表达的意思就是限制必须实现了TraitA，而且它的关联类型必须是String才能代入这个T。假如我们稍微改一下，把类型A实现TraitA 时的关联类型Item具化为u32，就会编译报错，你可以试着编译一下看下提示。
 
-```plain
+```rust
 trait TraitA {
     type Item;
 }
@@ -398,7 +393,6 @@ fn main() {
         x: A,  // 报错
     };
 }
-
 ```
 
 慢慢地我们给的示例有些烧脑了，现在你并不需要精通这些用法， **第一步是要认识它们**，当你看到别人写这种代码的时候，能基本看懂就可以了。
@@ -462,7 +456,7 @@ where
 
 你可以看一下这个例子。
 
-```plain
+```rust
 trait TraitA {
     const LEN: u32 = 10;
 }
@@ -479,12 +473,11 @@ fn main() {
 //输出
 12
 12
-
 ```
 
 如果在impl的时候不指定，会有什么效果呢？你可以看看代码运行后的结果。
 
-```plain
+```rust
 trait TraitA {
     const LEN: u32 = 10;
 }
@@ -499,7 +492,6 @@ fn main() {
 //输出
 10
 10
-
 ```
 
 ## trait 作为一种协议
@@ -617,7 +609,7 @@ trait TraitA: TraitB + TraitC {}
 
 有的时候多个约束上会定义同名方法，像下面这样：
 
-```plain
+```rust
 trait Shape {
     fn play(&self) {    // 定义了play()方法
         println!("1");
@@ -648,7 +640,6 @@ fn main() {
 3
 2
 1
-
 ```
 
 上面示例展示了两个不同的trait定义同名方法，以及在类型自身上再定义同名方法，然后是如何精准地调用到不同的实现的。可以看到，在Rust中，同名方法没有被覆盖，能精准地路由过去。
@@ -745,7 +736,7 @@ mod module_b {
 
 有了trait这种能力配置机制，我们可以在需要的地方按需加载能力。需要什么能力就引入什么能力（提供对应的约束）。不需要一次性限制过死，比如下面的示例就演示了几种约束组合的可能性。
 
-```plain
+```rust
 trait TraitA {}
 trait TraitB {}
 trait TraitC {}
@@ -785,7 +776,6 @@ fn main() {
 
     doit7(C);  // C的实例只能用在1个函数版本中
 }
-
 ```
 
 示例里，A的实例能用在全部的（7个）函数版本中，B的实例只能用在3个函数版本中，C的实例只能用在1个函数版本中。

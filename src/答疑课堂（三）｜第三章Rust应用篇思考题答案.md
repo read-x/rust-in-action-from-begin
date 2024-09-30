@@ -106,7 +106,7 @@ cargo add nom
 
 然后，你可以使用以下代码来解析 CSV 文件（一个简单示例）：
 
-```plain
+```rust
 use nom::{
   bytes::complete::tag,
   character::complete::{alphanumeric1 as field, line_ending},
@@ -135,7 +135,6 @@ fn main() {
     Err(e) => println!("Error: {:?}", e),
   }
 }
-
 ```
 
 ### [29｜Unsafe编程（上）： Unsafe Rust中那些被封印的能力](https://time.geekbang.org/column/article/739345)

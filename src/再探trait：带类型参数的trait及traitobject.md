@@ -86,7 +86,7 @@ where
 
 代码如下：
 
-```plain
+```rust
 // 定义一个带类型参数的trait
 trait Add<T> {
     type Output;
@@ -133,7 +133,6 @@ fn main() {
     assert_eq!(p3.x, 3);
     assert_eq!(p3.y, 3);
 }
-
 ```
 
 我们详细解释一下这个示例。 `Add<T>` 这个trait，带一个类型参数T，还带一个关联类型 Output。
@@ -215,7 +214,7 @@ struct Foo<T: TraitA<Item=String>> {
 
 对于第一点，请看下面的示例：
 
-```plain
+```rust
 use std::fmt::Debug;
 
 trait TraitA<T>
@@ -235,7 +234,6 @@ fn main() {
     let a = Atype;
     a.play(10u32);  // 在使用时，通过实例方法传入的参数类型具化T
 }
-
 ```
 
 这个示例展示了几个要点。
@@ -247,7 +245,7 @@ fn main() {
 
 当然，在impl的时候也可以指定成u32类型，所以下面的代码也可以。
 
-```plain
+```rust
 use std::fmt::Debug;
 
 trait TraitA<T>
@@ -264,14 +262,13 @@ fn main() {
     let a = Atype;
     a.play(10u32);
 }
-
 ```
 
 但是这样就没前面那么灵活了，比如 `a.play(10u64)` 就不行了。
 
 对应的，对关联类型来说，如果你在impl时不对其具化，就无法编译通过。所以对于第二点，我也给出一个例子来解释。我们把前面对Point类型实现Add的模型尝试用关联类型实现一遍。
 
-```plain
+```rust
 trait Add {
     type ToAdd;    // 多定义一个关联类型
     type Output;
@@ -317,7 +314,6 @@ fn main() {
     let p3 = p1.add(delta); // 这句是错的
     assert_eq!(p3.x, 3);
     assert_eq!(p3.y, 3);
-
 ```
 
 编译器会抱怨：
@@ -469,7 +465,7 @@ error[E0599]: no function or associated item named `new` found for type paramete
 
 第三个版本：
 
-```plain
+```rust
 struct Atype;
 struct Btype;
 struct Ctype;
@@ -505,7 +501,6 @@ fn main() {
     let b: Btype = doit::<Btype>();
     let c: Ctype = doit::<Ctype>();
 }
-
 ```
 
 这个版本顺利通过编译。在这个示例中，我们认识到了引入trait的必要性，就是让Rustc小助手知道我们在协议层面有一个new()函数，一旦类型参数被trait约束后，它就可以去trait中寻找协议定义的函数和方法。
@@ -740,7 +735,7 @@ impl trait 和 dyn trait 也可以用于函数传参。
 
 impl trait的示例：
 
-```plain
+```rust
 struct Atype;
 struct Btype;
 struct Ctype;
@@ -763,12 +758,11 @@ fn main() {
     let c = Ctype;
     doit(c);
 }
-
 ```
 
 dyn trait的示例：
 
-```plain
+```rust
 struct Atype;
 struct Btype;
 struct Ctype;
@@ -789,14 +783,13 @@ fn main() {
     let c = Ctype;
     doit(&c);
 }
-
 ```
 
 两种都可以。那么它们的区别是什么呢？
 
 impl trait用的是编译器静态展开，也就是编译时具化（单态化）。上面那个impl trait示例展开后类似于下面这个样子。
 
-```plain
+```rust
 struct Atype;
 struct Btype;
 struct Ctype;
@@ -819,7 +812,6 @@ fn main() {
     let c = Ctype;
     doit_c(c);
 }
-
 ```
 
 而 dyn trait的版本不会在编译期间做任何展开，dyn TraitA 自己就是一个类型，这个类型相当于一个代理类型，用于在运行时代理相关类型及调用对应方法。既然是代理，也就是调用方法的时候需要多跳转一次，从性能上来说，当然要比在编译期直接展开一步到位调用对应函数要慢一点。
@@ -840,7 +832,7 @@ dyn trait本身是一种非固定尺寸类型，这就注定了相比于 impl tr
 
 我们看下面的示例，我们想把三种类型装进一个Vec里面。
 
-```plain
+```rust
 struct Atype;
 struct Btype;
 struct Ctype;
@@ -858,7 +850,6 @@ fn main() {
 
     let v = vec![a, b, c];
 }
-
 ```
 
 报错：
@@ -876,7 +867,7 @@ error[E0308]: mismatched types
 
 请看示例：
 
-```plain
+```rust
 struct Atype;
 struct Btype;
 struct Ctype;
@@ -893,7 +884,6 @@ fn main() {
     let c = Ctype;
     let v: Vec<&dyn TraitA> = vec![&a, &b, &c];
 }
-
 ```
 
 成功了，不同类型的实例（实际是实例的引用）竟然被放进了同一个Vec中，强大！你可以自己尝试一下，将不同类型的实例放入HashMap中。

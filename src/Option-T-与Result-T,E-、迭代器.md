@@ -424,7 +424,7 @@ assert_eq!(x.err(), Some("Nothing here"));
 
 迭代器上有一个标准方法，叫作 `next()`，这个方法返回 `Option<Item>`，其中 Item 就是组成迭代器的元素。这个方法的字面意思就是 **迭代出下一个元素**。如果这个集合被迭代完成了，那么最后一次执行会返回 `None`。比如下面的例子，在迭代器上调用 `.next()` 返回 `u32` 数字。
 
-```plain
+```rust
 fn main() {
     let a: Vec<u32> = vec![1, 2, 3, 4, 5];
     let mut an_iter = a.into_iter();    // 将Vec<u32>转换为迭代器
@@ -439,7 +439,6 @@ fn main() {
 3
 4
 5
-
 ```
 
 实际上，Rust中不止 `into_iter()` 这一种将集合转换成迭代器的方法。
@@ -456,7 +455,7 @@ Rust中的迭代器根据所有权三态可以分成三种。
 
 我们来看这三种不同的迭代器的一个对比。
 
-```plain
+```rust
 fn main() {
     let mut a = [1, 2, 3];    // 一个整数数组
 
@@ -483,12 +482,11 @@ fn main() {
 
     println!("{:?}", a);
 }
-
 ```
 
 你还可以与字符串数组进行对比加深理解。
 
-```plain
+```rust
 fn main() {
     let mut a = ["1".to_string(), "2".to_string(), "3".to_string()];
     let mut an_iter = a.iter();
@@ -514,7 +512,6 @@ fn main() {
 
     println!("{:?}", a);    // 请你试试这一行有没有问题？
 }
-
 ```
 
 对于整数数组 `[1,2,3]` 而言，调用 `into_iter()` 实际会复制一份这个数组，再将复制后的数组转换成迭代器，并消耗掉这个复制后的数组，因此最后的打印语句能把原来那个a打印出来。对于字符串数组 `["1".to_string(), "2".to_string(), "3".to_string()]` 而言，调用 `into_iter()` 会直接消耗掉这个字符串数组，因此最后的打印语句不能把原来那个a打印出来。
@@ -546,7 +543,7 @@ Rust中也考虑到了这种需求，提供了配套的辅助语法。
 
 我们来看示例。
 
-```plain
+```rust
 fn main() {
     let mut a = ["1".to_string(), "2".to_string(), "3".to_string()];
 
@@ -574,7 +571,6 @@ fn main() {
 1
 2
 3
-
 ```
 
 因为 `into_iter()` 会消耗集合所有权，因此在上面示例中我们把它放在最后去展示。
@@ -583,7 +579,7 @@ fn main() {
 
 我们来看一个简单的例子，一般来说，我们想要获取Vec里的一个元素，只需要下标操作就可以了。
 
-```plain
+```rust
 fn main() {
     let s1 = String::from("aaa");
     let s2 = String::from("bbb");
@@ -593,7 +589,6 @@ fn main() {
     let v = vec![s1, s2, s3, s4];
     let a = v[0];    // 这里，我们想访问 s1 的内容
 }
-
 ```
 
 这段代码稀松平常，在Rust中却没办法编译通过。
@@ -631,7 +626,7 @@ fn main() {
 
 在上面示例中，你可能为了从集合中获得 s1 的所有权，而不得不使用 `let a = v[0].clone()`。而根据我们这节课讲的迭代器知识，使用 `into_iter()` 就可以拿到并操作上述动态数组v中元素的所有权。
 
-```plain
+```rust
 fn main() {
     let s1 = String::from("aaa");
     let s2 = String::from("bbb");
@@ -643,7 +638,6 @@ fn main() {
         println!("{}", s);
     }
 }
-
 ```
 
 这也体现了Rust对权限有相当细致的管理。对于下标索引这种不安全的操作，禁止获得集合元素所有权；对于迭代器这种安全的操作，允许它获得集合元素所有权。

@@ -14,7 +14,7 @@ Rust和C有血缘关系，具有ABI上的一致性，所以 **Rust和C之间可�
 
 一般各个平台下都有 libm 库，它是操作系统基本的数学math库。下面我们以Linux为例来说明。下面的示例代码来自 [Rust By Example](https://doc.rust-lang.org/rust-by-example/std_misc/ffi.html)。
 
-```plain
+```rust
 use std::fmt;
 
 // 连接到系统的 libm 库
@@ -62,7 +62,6 @@ impl fmt::Debug for Complex {
         }
     }
 }
-
 ```
 
 libm 库是用C语言实现的，我们要调用它，需要用这样的标注。

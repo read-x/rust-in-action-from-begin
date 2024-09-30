@@ -82,13 +82,12 @@ Bevy的2D默认的坐标系统是原点在窗口正中间的一个正坐标系�
 
 很简单，引入Bevy库，创建一个App实例。
 
-```plain
+```rust
 use bevy::prelude::*;
 
 fn main() {
     App::new().run();
 }
-
 ```
 
 这个程序运行后马上就结束了，没有任何输出，也没有窗口打开。
@@ -97,7 +96,7 @@ fn main() {
 
 加入默认Plugin集合，里面有个主事件循环，还有个创建窗口的功能。然后我们需要设置2D的Camera。
 
-```plain
+```rust
 use bevy::prelude::*;
 
 fn main() {
@@ -110,7 +109,6 @@ fn main() {
 fn setup_camera(mut commands: Commands) {
     commands.spawn(Camera2dBundle::default());
 }
-
 ```
 
 由于引擎本身是一个托管系统（带主循环的Runtime），我们要在这个引擎所维护的世界状态里添加（或删除）新的东西，必须使用 Commands 这种任务指令形式。你可以把它想象成总线或消息队列编程模型。

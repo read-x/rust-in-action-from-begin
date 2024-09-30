@@ -76,7 +76,7 @@ async fn foo1() -> u32 {
 
 好消息是，tokio专门给我们提供了另外的设施来处理这种情况，就是 `task::spawn_blocking()` 函数。你可以看一下它的使用方法。
 
-```plain
+```rust
 #[tokio::main]
 async fn main() {
     // 此任务跑在一个单独的线程中
@@ -86,7 +86,6 @@ async fn main() {
     // 像下面这样用同样的方式等待这种阻塞式任务的完成
     blocking_task.await.unwrap();
 }
-
 ```
 
 只需要把CPU计算密集型任务放到 `task::spawn_blocking()` 里就可以了，tokio会帮我们单独开一个新的系统线程，来专门跑这个CPU计算密集型的task。然后和普通的tokio task一样，可以通过await来获取它的结果，当然，也可以用Oneshot channel把结果返回回来。
@@ -101,17 +100,16 @@ async fn main() {
 
 回想一下我们前面讲到的，展开 `#[tokio::main]`。
 
-```plain
+```rust
 #[tokio::main]
 async fn main() {
     println!("Hello world");
 }
-
 ```
 
 展开后，其实是下面这个样子：
 
-```plain
+```rust
 fn main() {
     tokio::runtime::Builder::new_multi_thread()
         .enable_all()
@@ -121,12 +119,11 @@ fn main() {
             println!("Hello world");
         })
 }
-
 ```
 
 类似地，我们要在同步风格的代码中执行async代码，只需要手动 block\_on 这段异步代码就可以了。除了默认的系统多线程Runtime之外，tokio专门为这种临时的（以及测试的）场景提供了另一种单系统线程的runtime，就是 `new_current_thread()`。它的意思是就在当前程序执行的线程中建立tokio Runtime，异步任务就跑在当前这个线程中。比如：
 
-```plain
+```rust
 async fn foo1() -> u32 {
     10
 }
@@ -149,7 +146,6 @@ fn main() {
 }
 // 输出
 10
-
 ```
 
 就通过这种方式，我们在主体为std Rust的代码中，成功地调用了局部的async Rust代码，并得到了这段局部异步代码的返回值。

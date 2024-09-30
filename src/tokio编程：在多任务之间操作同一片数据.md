@@ -37,13 +37,12 @@ task\_a 想把它更新成 50，task\_b 想把它更新成 100。这两个任务
 
 我们先来试试直接在main函数里对这个DB全局变量进行操作。
 
-```plain
+```rust
 static DB: Vec<u32> = Vec::new();
 
 fn main() {
     DB.push(10);
 }
-
 ```
 
 发现不行，编译会报错：
@@ -59,13 +58,12 @@ error[E0596]: cannot borrow immutable static item `DB` as mutable
 
 可能是没加 mut？加上试一试。
 
-```plain
+```rust
 static mut DB: Vec<u32> = Vec::new();
 
 fn main() {
     DB.push(10);
 }
-
 ```
 
 还是出错：
@@ -89,17 +87,16 @@ Rust编译器报错说，要使用可变的静态全局变量是不安全的，�
 
 稍微改一下上面的代码，这下可以了。
 
-```plain
+```rust
 fn main() {
     let mut db: Vec<u32> = vec![1,2,3,4,5,6,7,8,9,10];
     db[4] = 50;
 }
-
 ```
 
 下面我们尝试在main函数中创建一个tokio任务。
 
-```plain
+```rust
 #[tokio::main]
 async fn main() {
     let mut db: Vec<u32> = vec![1,2,3,4,5,6,7,8,9,10];
@@ -111,7 +108,6 @@ async fn main() {
 
     println!("{:?}", db);
 }
-
 ```
 
 这是一段稀松平常的代码，目的就是起一个task，更新一下Vec里的元素，然后等待这个任务结束，打印这个Vec的值。但是，在Rust中，这段代码无法通过，Rust编译器会报错。
@@ -141,7 +137,7 @@ help: to force the async block to take ownership of `db` (and any other referenc
 
 它在错误信息第12行建议我们在 async 后加 move 修饰符，这样指明强制将 db 的所有权移动进task\_里去。我们按照建议修改一下。
 
-```plain
+```rust
 #[tokio::main]
 async fn main() {
     let mut db: Vec<u32> = vec![1,2,3,4,5,6,7,8,9,10];
@@ -153,7 +149,6 @@ async fn main() {
 
     println!("{:?}", db);
 }
-
 ```
 
 仍然编译出错，报错信息换了。
@@ -181,7 +176,7 @@ error[E0382]: borrow of moved value: `db`
 
 那么我们就听小助手的话，不在main函数中打印了。这样确实能编译通过。
 
-```plain
+```rust
 #[tokio::main]
 async fn main() {
     let mut db: Vec<u32> = vec![1,2,3,4,5,6,7,8,9,10];
@@ -191,12 +186,11 @@ async fn main() {
     });
     _ = task_a.await.unwrap();
 }
-
 ```
 
 第一步走通了，下一步我们要测试多任务并发的情况，所以我们需要再增加一个任务。
 
-```plain
+```rust
 use tokio::task;
 
 #[tokio::main]
@@ -212,7 +206,6 @@ async fn main() {
     _ = task_a.await.unwrap();
     _ = task_b.await.unwrap();
 }
-
 ```
 
 这种写法明显会有问题，我们甚至不需要编译就可以知道，因为出现了两次 async move 块。如果你是一步步学过来的话，应该知道，db在第一个async move时已经被移动进 task\_a 了，后面不可能再移动进 task\_b。
@@ -247,7 +240,7 @@ error[E0382]: use of moved value: `db`
 
 回想一下 [第 12 讲](https://time.geekbang.org/column/article/725815) 我们讲到过的Arc这个智能指针，它可以让多个持有者共享对同一资源的所有权。但是Arc也有一个巨大的限制，就是它无法修改被包裹的值。但不管怎样，我们还是碰碰运气，改动一下。
 
-```plain
+```rust
 use std::sync::Arc;
 
 #[tokio::main]
@@ -267,7 +260,6 @@ async fn main() {
 
     // println!("{:?}", db);
 }
-
 ```
 
 不出所料，Rust编译不通过，这说明通过 `Arc<T>` 没办法修改里面的值。
@@ -301,7 +293,7 @@ error[E0596]: cannot borrow data in an `Arc` as mutable
 
 Mutex是一种互斥锁，被Mutex包裹住的对象，同时只能存在一个reader或一个writer。使用的时候，要先获得Mutex锁，成功后，才能读或写这个锁里面的值。多个任务不能同时获得同一个Mutex锁，当一个任务持有Mutex锁时，其他任务会处于等待状态，直到那个任务用完了Mutex锁，并自动释放了它。
 
-```plain
+```rust
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
@@ -329,7 +321,6 @@ async fn main() {
 }
 // 输出
 [1, 2, 3, 4, 100, 6, 7, 8, 9, 10]
-
 ```
 
 加上Mutex，这个例子就能顺利编译并运行通过了。
@@ -358,7 +349,7 @@ RwLock是读写锁。它和Mutex的区别是，Mutex不论是读还是写，同�
 
 我们来看下面的示例：
 
-```plain
+```rust
 use tokio::sync::RwLock;
 #[tokio::main]
 async fn main() {
@@ -378,7 +369,6 @@ async fn main() {
         assert_eq!(*w, 6);
     } // 在这一句结束时，写锁释放掉了
 }
-
 ```
 
 可以看到，RwLock的使用非常简单，在读操作比写操作多很多的情况下，RwLock的性能会比Mutex好很多。
@@ -393,7 +383,7 @@ Rust标准库中还有一些用于简单类型的原子锁。
 
 像下面这样使用：
 
-```plain
+```rust
 use std::sync::atomic::AtomicU32;
 
 fn main() {
@@ -406,7 +396,6 @@ fn main() {
     *some_var.get_mut() = 5;
     assert_eq!(*some_var.get_mut(), 5);
 }
-
 ```
 
 其他类型按类似的方式使用就可以了。原子类型之所以会单独提出来，是因为它是锁的基础，其他的锁会建立在这些基础原子类型之上，这些原子类型也可以充分利用硬件提供的关于原子操作的支持，从而提高应用的性能。

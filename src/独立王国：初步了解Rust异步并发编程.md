@@ -97,22 +97,20 @@ async fn foo() {
 
 我们知道，Rust的程序都是从main函数开始执行的。
 
-```plain
+```rust
 fn main() {
 }
-
 ```
 
 即使是异步代码，也不能破坏这个规则。
 
 我们试着这样写：
 
-```plain
+```rust
 async fn main() {      // 在main函数前加一个async修饰
     let a = async {};
     a.await;
 }
-
 ```
 
 会报错：
@@ -124,24 +122,22 @@ error[E0752]: `main` function is not allowed to be `async`
 
 Rust 明确规定了，main函数前不能加async修饰。也就是说，只能写成这种形式。
 
-```plain
+```rust
 fn main() {
     let a = async {};
     a.await;
 }
-
 ```
 
 但是前面又说过了， `.await` 只能写在async代码块或函数里。我们进入了一个两难的境地。如果就在目前这个体系里面寻找解决方案的话，那只能原地打转。
 
 **这里必然要引入一种外部驱动机制**。比如，有一个辅助函数，它可以接收Future，并驱动它，而不需要使用 `.await`。像下面这样就行了。
 
-```plain
+```rust
 fn main() {
     let a = async {};
     block_on(a);  // 辅助驱动函数 block_on
 }
-
 ```
 
 那么，这个 `block_on()` 到底是什么呢？
@@ -195,17 +191,16 @@ tokio = { version = "1", features = ["full"] }
 
 像下面这样：
 
-```plain
+```rust
 #[tokio::main]      // 这个是tokio库里面提供的一个属性宏标注
 async fn main() {   // 注意 main 函数前面有 async
     println!("Hello world");
 }
-
 ```
 
 这个 `#[tokio::main]` 做的事情其实就是把用 async 修饰的 main 函数展开，展开会类似下面这个样子：
 
-```plain
+```rust
 fn main() {
     tokio::runtime::Builder::new_multi_thread()
         .enable_all()
@@ -215,7 +210,6 @@ fn main() {
             println!("Hello world");
         })
 }
-
 ```
 
 也就是在main函数里构建一个Runtime实例，第二行代码的意思是 tokio 库下 Runtime 模块的 Builder 类型里的 `new_multi_thread()` 函数，整个路径用 `::` 号连接， `::` 也叫路径符。这个函数创建的是多线程版本的 Runtime 实例。
@@ -226,17 +220,16 @@ fn main() {
 
 tokio还可以基于当前系统线程创建单线程的Runtime，你可以看一下示例。
 
-```plain
+```rust
 #[tokio::main(flavor = "current_thread")]  // 属性标注里面配置参数
 async fn main() {
     println!("Hello world");
 }
-
 ```
 
 展开后，是这个样子的：
 
-```plain
+```rust
 fn main() {
     tokio::runtime::Builder::new_current_thread()  // 注意这一句
         .enable_all()
@@ -246,7 +239,6 @@ fn main() {
             println!("Hello world");
         })
 }
-
 ```
 
 单线程的Runtime由 `Builder::new_current_thread()` 函数创建，代码的其他部分和多线程Runtime都一样。
@@ -259,7 +251,7 @@ fn main() {
 
 下面的例子展示了如何基于tokio做文件的写操作。
 
-```plain
+```rust
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;     // 引入AsyncWriteExt trait
 
@@ -273,14 +265,13 @@ async fn doit() -> std::io::Result<()> {
 async fn main() {
     let result = doit().await;   // 注意这里的.await
 }
-
 ```
 
 #### 文件读
 
 下面的例子展示了如何基于tokio做文件的读操作。
 
-```plain
+```rust
 use tokio::fs::File;
 use tokio::io::AsyncReadExt;   // 引入AsyncReadExt trait
 
@@ -298,7 +289,6 @@ async fn main() {
     let result = doit().await;  // 注意这里的.await
     // process
 }
-
 ```
 
 可以看到，Rust的异步代码和JavaScript的异步代码非常类似，只不过JavaScript的 await 关键字是放在语句前面的。
@@ -307,7 +297,7 @@ async fn main() {
 
 下面的例子展示了如何基于tokio做定时器操作。
 
-```plain
+```rust
 use tokio::time;
 use std::time::Duration;
 
@@ -322,7 +312,6 @@ async fn main() {
     // 滴答，这个滴答完成后，20ms过去了
     interval.tick().await;
 }
-
 ```
 
 上面示例里的时间段， `Duration::from_millis(10)` 表示创建一个10ms的时间段，我们在其他语言中更多是习惯直接传入一个数字，比如传 10000 进去，默认单位是 us。但是前面我们说过，Rust中会尽可能地类型化，因此这里定义了一个Duration类型，它可以接收来自s、ms、us等单位的数值来构造时间段。在这点上，Java和Rust是比较像的。
@@ -382,7 +371,7 @@ tokio的这个模型是一种M：N模型，M表示轻量级线程的数量，N�
 
 下面我们来看一下如何创建tokio task，这需要使用 `task::spawn()` 函数。
 
-```plain
+```rust
 use tokio::task;
 
 #[tokio::main]
@@ -391,7 +380,6 @@ async fn main() {
         // 在这里执行异步任务
     });
 }
-
 ```
 
 在这个示例里，main函数里面创建了一个新的task，用来执行具体的任务。我们需要知道，tokio管理下的 `async fn main() {}` 本身就是一个task，相当于在main task中，创建了一个新的task来执行。这里，main task就是父task，新创建的这个task是子task。
@@ -400,7 +388,7 @@ async fn main() {
 
 注：在main函数中有更多细节，如果main函数所在的task先结束了，会导致整个程序进程退出，有可能会强制杀掉那些新创建的子task。
 
-```plain
+```rust
 use tokio::task;
 
 #[tokio::main]
@@ -414,14 +402,13 @@ async fn main() {
     let result = task_a.await.unwrap();
     assert_eq!(result, "hello world!");
 }
-
 ```
 
 JoinHandler是什么意思呢？这个新概念跟task的管理相关。我们在main task中里创建一个新task后， `task::spawn()` 函数实际有一个返回值，它返回一个handler，这个handler可以让我们在main task里管理新创建的task。这个handler也可以用来指代这个新的task，相当于给这个task取了一个名字。比如示例里，我们就把这个新的任务命名为task\_a，它的类型是 JoinHandler。在用 `spawn()` 创建task\_a后，这个新任务就 **立即执行**。
 
 `task_a.await` 会返回一个Result，所以上面代码中，需要加一个 `unwrap()` 把task\_a真正的返回内容解包出来。至于对task的 `.await` 为什么会返回一个Result，而不是直接返回异步任务的返回值本身，是因为task里有可能会发生panic。你可以看一下例子。
 
-```plain
+```rust
 use tokio::task;
 
 #[tokio::main]
@@ -432,14 +419,13 @@ async fn main() {
     // 当task_a里面panic时，对task handler进行.await，会得到Err
     assert!(task_a.await.is_err());
 }
-
 ```
 
 由于task可能会panic，所以就得对task的返回值用Result包一层，这样方便在上一层的task里处理这种错误。 **在Rust中，只要过程中有可能返回错误，那就果断用Result包一层作为返回值，这是典型做法。**
 
 有了 JoinHandler，我们可以方便地创建一批新任务，并等待它们的返回值。你可以看一下示例。
 
-```plain
+```rust
 use tokio::task;
 
 async fn my_background_op(id: i32) -> String {
@@ -466,7 +452,6 @@ async fn main() {
 Starting background task 1.
 Starting background task 2.
 Starting background task 3.
-
 ```
 
 上面示例里，我们用 tasks 这个动态数组持有3个异步任务的handler， **它们是并发执行的**。然后对 tasks 进行迭代，等待每个task执行完成，并且搜集任务的结果放到 outputs 动态数组里。最后打印出来。

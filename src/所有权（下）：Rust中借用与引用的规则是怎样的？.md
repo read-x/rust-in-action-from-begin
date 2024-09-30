@@ -10,7 +10,7 @@
 
 我们来复习一下上一节课最后一个例子。我们想在函数 `foo` 执行后继续使用字符串s1，我们通过把字符串的所有权转移出来，来达到我们的目的。
 
-```plain
+```rust
 fn foo(s: String) -> String {
     println!("{s}");
     s
@@ -21,7 +21,6 @@ fn main() {
     let s1 = foo(s1);
     println!("{s1}");
 }
-
 ```
 
 这样可以是可以，不过很麻烦。一是会给程序员造成一些心智负担，还得想着把值传回来再继续使用。如果代码中到处都是所有权传来传去，会让代码显得相当冗余，毕竟很多时候函数返回值是要用作其他类型的返回的。为了解决这个问题，Rust引入了借用的概念。
@@ -34,7 +33,7 @@ fn main() {
 
 让我们来看一下如何使用引用。
 
-```plain
+```rust
 fn main() {
     let a = 10u32;
     let b = &a;        // b是变量a的一级引用
@@ -54,7 +53,6 @@ fn main() {
 10
 10
 10
-
 ```
 
 从上面示例中可以看出，Rust识别了我们一般情况下的意图，不会打印出引用的内存地址什么的，而是打印出了被引用对象的值。示例中的c实际是a的5次引用，但是打印时仍然正确获取到了a的值。d是a的间接引用，但是仍然正确获取到了a的值。这里我们可以看出Rust与C这种纯底层语言的显著区别，Rust对程序员更友好，它会更多地面向业务。因为人们还是普遍关注最终那个值的部分，而不是中间过程的内存地址。
@@ -63,7 +61,7 @@ fn main() {
 
 那对字符串来说会怎样呢？我们改一下上面的示例。
 
-```plain
+```rust
 fn main() {
     let s1 = String::from("I am a superman.");
     let s2 = &s1;
@@ -83,7 +81,6 @@ I am a superman.
 I am a superman.
 I am a superman.
 I am a superman.
-
 ```
 
 结果符合我们的期望。同样，这些引用都没有导致堆中的字符串资源被复制一份或多份。字符串的所有权仍然在s1那里，s2、s3、s4、s5都是对这个所有权变量的引用。从这里开始，我们可以将变量按一个新的维度划分为 **所有权型变量** 和 **引用型变量**。
@@ -110,7 +107,7 @@ I am a superman.
 
 我们前面举的引用的例子，实际只是访问（打印）变量的值，没有修改它们，所以没问题。现在我们再来看一下，如果要使用引用修改变量的值，应该怎么做。
 
-```plain
+```rust
 fn main() {
     let a = 10u32;
     let b = &mut a;
@@ -118,7 +115,6 @@ fn main() {
 
     println!("{b}");
 }
-
 ```
 
 提示：
@@ -143,7 +139,7 @@ help: consider changing this to be mutable
 
 现在我们加上。
 
-```plain
+```rust
 fn main() {
     let mut a = 10u32;
     let b = &mut a;
@@ -153,12 +149,11 @@ fn main() {
 }
 // 输出
 20
-
 ```
 
 接下来改动一下例子。
 
-```plain
+```rust
 fn main() {
     let mut a = 10u32;
     let b = &mut a;
@@ -170,14 +165,13 @@ fn main() {
 // 输出
 20
 20
-
 ```
 
 正确输出了修改后的值。
 
 我们再换一下两个打印语句的位置试试。
 
-```plain
+```rust
 fn main() {
     let mut a = 10u32;
     let b = &mut a;
@@ -186,7 +180,6 @@ fn main() {
     println!("{a}");  // 这一句移到前面来
     println!("{b}");
 }
-
 ```
 
 编译居然报错了！
@@ -219,19 +212,18 @@ error[E0502]: cannot borrow `a` as immutable because it is also borrowed as muta
 
 为了让问题暴露得更加明显，我又设计了另外一个例子。
 
-```plain
+```rust
 fn main() {
     let mut a = 10u32;
     let b = &mut a;
     *b = 20;
     let c = &a;      // 在利用b更新了a的值后，c再次借用a
 }
-
 ```
 
 这个代码是可以顺利编译的。但是加了一句打印就又不行了！
 
-```plain
+```rust
 fn main() {
     let mut a = 10u32;
     let b = &mut a;
@@ -240,7 +232,6 @@ fn main() {
 
     println!("{b}");  // 加了一句打印语句
 }
-
 ```
 
 提示：
@@ -269,7 +260,7 @@ error[E0502]: cannot borrow `a` as immutable because it is also borrowed as muta
 
 我们试着改一下打印语句。
 
-```plain
+```rust
 fn main() {
     let mut a = 10u32;
     let b = &mut a;
@@ -280,14 +271,13 @@ fn main() {
 }
 // 输出
 20
-
 ```
 
 这下编译通过了，打印出 20。
 
 我们尝试一下把变量c的定义移到前面一些，结果又不能编译了。
 
-```plain
+```rust
 fn main() {
     let mut a = 10u32;
     let c = &a;        // c的定义移到这里来了
@@ -296,7 +286,6 @@ fn main() {
 
     println!("{c}");
 }
-
 ```
 
 提示：
@@ -320,7 +309,7 @@ error[E0502]: cannot borrow `a` as mutable because it is also borrowed as immuta
 
 再尝试修改代码，又编译通过了。
 
-```plain
+```rust
 fn main() {
     let mut a = 10u32;
     let c = &a;           // c的定义移到这里来了
@@ -329,7 +318,6 @@ fn main() {
 
     println!("{b}");      // 这里打印的变量换成b
 }
-
 ```
 
 到这里为止，我们已经积累了不少素材了，从这些素材中你有没有发现什么规律？ **引用的最后一次调用时机很关键**。
@@ -338,7 +326,7 @@ fn main() {
 
 同时，我们发现还存在一条规则： **一个所有权型变量的可变引用与不可变引用的作用域不能交叠**，也可以说不能同时存在。我们用这条规则分析前面的示例。
 
-```plain
+```rust
 fn main() {
     let mut a = 10u32;
     let c = &a;
@@ -347,7 +335,6 @@ fn main() {
 
     println!("{c}");
 }
-
 ```
 
 所有权型变量a的作用域是2~8行，不可变引用c的作用域是3~7行，可变引用b的作用域是4~5行。b和c的作用域交叠了，因此无法编译通过。
@@ -356,7 +343,7 @@ fn main() {
 
 接下来我们再看一个例子。
 
-```plain
+```rust
 fn main() {
     let mut a = 10u32;
     let b = &mut a;
@@ -367,12 +354,11 @@ fn main() {
 }
 // 输出
 20
-
 ```
 
 这个例子打印出 20。那我们尝试打印b试试。
 
-```plain
+```rust
 fn main() {
     let mut a = 10u32;
     let b = &mut a;
@@ -381,7 +367,6 @@ fn main() {
 
     println!("{b}");      // 打印b
 }
-
 ```
 
 编译不通过，提示：
@@ -407,7 +392,7 @@ error[E0499]: cannot borrow `a` as mutable more than once at a time
 
 然后，让我们继续看。
 
-```plain
+```rust
 fn main() {
     let mut a = 10u32;
     let r1 = &a;
@@ -415,7 +400,6 @@ fn main() {
 
     println!("{r1}");
 }
-
 ```
 
 编译报错：
@@ -440,7 +424,7 @@ error[E0506]: cannot assign to `a` because it is borrowed
 
 有可变借用存在的情况下也一样。
 
-```plain
+```rust
 fn main() {
     let mut a = 10u32;
     let r1 = &mut a;
@@ -448,7 +432,6 @@ fn main() {
 
     println!("{r1}");
 }
-
 ```
 
 编译报错：
@@ -482,7 +465,7 @@ error[E0506]: cannot assign to `a` because it is borrowed
 
 下面我们再来试试可变引用能否被复制。
 
-```plain
+```rust
 fn main() {
     let mut a = 10u32;
     let r1 = &mut a;
@@ -490,7 +473,6 @@ fn main() {
 
     println!("{r1}")
 }
-
 ```
 
 出错了，提示：
@@ -513,7 +495,7 @@ error[E0382]: borrow of moved value: `r1`
 
 我们修改一下例子。
 
-```plain
+```rust
 fn main() {
     let mut a = 10u32;
     let r1 = &mut a;
@@ -523,7 +505,6 @@ fn main() {
 }
 // 输出
 10
-
 ```
 
 成功打印。
@@ -534,7 +515,7 @@ fn main() {
 
 我们来看剩下的一些语言细节。下面这段代码展示了 `mut` 修饰符， `&mut` 和 `&` 同时出现的情况。
 
-```plain
+```rust
 fn main() {
     let mut a1 = 10u32;
     let mut a2 = 15u32;
@@ -545,12 +526,11 @@ fn main() {
     let mut c = &a1;
     c = &a2;
 }
-
 ```
 
 下面我们再来看一个多级可变引用的例子。
 
-```plain
+```rust
 fn main() {
     let mut a1 = 10u32;
     let mut b = &mut a1;
@@ -563,12 +543,11 @@ fn main() {
 }
 // 输出
 30
-
 ```
 
 假如我们解引用错误会怎样，来看看。
 
-```plain
+```rust
 fn main() {
     let mut a1 = 10u32;
     let mut b = &mut a1;
@@ -579,7 +558,6 @@ fn main() {
 
     println!("{c}");
 }
-
 ```
 
 哦！会报错。
@@ -605,7 +583,7 @@ help: consider dereferencing here to assign to the mutably borrowed value
 
 我们再来看一个例子。
 
-```plain
+```rust
 fn main() {
     let mut a1 = 10u32;
     let b = &mut a1;
@@ -616,7 +594,6 @@ fn main() {
 
     println!("{d}");
 }
-
 ```
 
 提示：
@@ -644,7 +621,7 @@ For more information about this error, try `rustc --explain E0594`.
 
 有了引用这个设施，我们可以改进前面将字符串所有权传进函数，然后又传出来的例子。第一个例子是将字符串的不可变引用传进函数参数。
 
-```plain
+```rust
 fn foo(s: &String) {
     println!("in fn foo: {s}");
 }
@@ -654,7 +631,6 @@ fn main() {
     foo(&s1);    // 注意这里传的是字符串的引用 &s1
     println!("{s1}");    // 这里可以打印s1的值了
 }
-
 ```
 
 可以看到，打印出了正确的结果。
@@ -667,7 +643,7 @@ I am a superman.
 
 然后我们试试将字符串的可变引用传进函数，并修改字符串的内容。
 
-```plain
+```rust
 fn foo(s: &mut String) {
     s.push_str(" You are batman.");
 }
@@ -678,7 +654,6 @@ fn main() {
     foo(&mut s1);    // 注意这里传的是字符串的可变引用 &mut s1
     println!("{s1}");
 }
-
 ```
 
 输出：
@@ -709,7 +684,7 @@ I am a superman. You are batman.
 
 1. 请思考，为何在不可变引用存在的情况下（只是读操作），原所有权变量也无法写入？
 
-```plain
+```rust
 fn main() {
     let mut a: u32 = 10;
     let b = &a;
@@ -717,7 +692,6 @@ fn main() {
 
     println!("{}", b);
 }
-
 ```
 
 1. 请回答，可变引用复制的时候，为什么不允许copy，而是move？

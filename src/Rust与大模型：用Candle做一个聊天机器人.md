@@ -137,7 +137,7 @@ cargo run --release --bin simple
 
 你可以看一下代码。
 
-```plain
+```rust
 #![allow(unused)]
 
 use std::fs::File;
@@ -309,7 +309,6 @@ fn main() -> anyhow::Result<()> {
 
     Ok(())
 }
-
 ```
 
 我们分段讲解这100多行代码。
@@ -336,7 +335,7 @@ LogitsProcessor 是一个用于修改模型输出概率分布的工具。我们�
 
 在Rust中，写一个命令行非常简单，直接用clap，改几行代码就可以了。将上面示例中的Args结构体的定义变成下面这样就可以了，然后在调用的时候使用 `Args::parse()` 生成 Args 实例。
 
-```plain
+```rust
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
@@ -363,7 +362,6 @@ fn main() {
     let args = Args::parse();
     // ...
 }
-
 ```
 
 经过升级的命令有了下面这些参数：

@@ -111,7 +111,7 @@ tag非常常用，用来指代一个确定性的字符串，比如 “hello”�
 
 0号解析器就相当于整数的0，这是一个什么也干不了的解析器。
 
-```plain
+```rust
 use std::error::Error;
 use nom::IResult;
 
@@ -124,7 +124,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     assert_eq!(output, "");
     Ok(())
 }
-
 ```
 
 上面的 `do_nothing_parser()` 函数就是一个Nom的解析器，对，就是一个普通的Rust函数，它接收一个 &str 参数，返回一个 `IResult<&str, &str>，IResult<I, O>` 是 Nom 定义的解析器的标准返回类型。你可以看一下它的 [定义](https://docs.rs/nom/latest/nom/type.IResult.html)。
@@ -144,7 +143,7 @@ pub type IResult<I, O, E = Error<I>> = Result<(I, O), Err<E>>;
 
 这次我们必须要做点什么事情了，那就把 `"abcedfg"` 的前三个字符识别出来。我们需要用到 tag 解析器。代码如下：
 
-```plain
+```rust
 pub use nom::bytes::complete::tag;
 pub use nom::IResult;
 use std::error::Error;
@@ -161,7 +160,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     assert!(parse_input("defdefg").is_err());
     Ok(())
 }
-
 ```
 
 在这个例子里， `tag("abc")` 的返回值是一个 parser，然后这个parser再接收 input 的输入，并返回 `IResult<&str, &str>`。前面的我们看到，tag识别固定的字符串/字节串。
@@ -195,7 +193,7 @@ impl Fn(Input) -> IResult<Input, Input, Error>
 
 代码如下：
 
-```plain
+```rust
 use std::error::Error;
 use nom::IResult;
 use nom::bytes::complete::tag;
@@ -249,7 +247,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     Ok(())
 }
-
 ```
 
 我们从 `parse_coordinate() parser` 看起。首先遇到的是 delimited 这个 combinator，它的作用我们查一下上面的表格，是解析左分界符目标信息右分界符这种格式，返回目标信息，也就是解析 `(xxx), <xxx>, {xxx}` 这种前后配对边界符的pattern，正好可以用来识别我们这个 `(x, y)`，我们把 `"(x, y)"` 第一步分解成 `"(", "x, y", ")"` 三部分，用 delimited 来处理。同样的，它也返回一个解析器闭包。
